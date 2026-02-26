@@ -17,8 +17,8 @@ Program::Program() {
         });
 
     for (int i = 0; i < 30; i++) {
-        float x = 250 + 50 * i;
-        float y = 200 + 50 * i;
+        float x = 250 + 50 * (i % 10);
+        float y = 200 + 50 * (i / 10);
 
         Enemy::enemies.push_back(std::pair<std::pair<float, float>, Enemy*> {
             std::pair<float, float>{x, y}, 
@@ -57,6 +57,10 @@ void Program::Update() {
 
         for (Projectile& p : Projectile::projectiles) { 
             p.update(); 
+
+            if (p.ID !=0 && HitBox::Collision(player->hitBox, p.getHitBox())){
+                PlayerReset();
+            }
 
         }
 
@@ -187,4 +191,14 @@ void Program::Reset() {
     count = 0;
     delay = 0;
     lives = 3;
+
+    Enemy::enemies.push_back({{350, 150}, new SpEnemy(350, 150)});
+    Enemy::enemies.push_back({{600, 150}, new SpEnemy(600, 150)});
+
+    for (int i = 0; i < 30; i++) {
+        float x = 250 + 50 * (i % 10);
+        float y = 200 + 50 * (i / 10);
+
+        Enemy::enemies.push_back({{x, y}, new StdEnemy(x, y)});
+    }
 }
