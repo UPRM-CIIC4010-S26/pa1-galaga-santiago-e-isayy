@@ -1,4 +1,7 @@
 #include "Program.hpp"
+#include <string>
+
+using namespace std;
 
 Program::Program() {
     Background::sideWalls = std::pair<HitBox, HitBox>{ 
@@ -68,6 +71,13 @@ void Program::Update() {
         Projectile::CleanProjectiles();
         Projectile::ProjectileCollision();
     }
+    int maxLives=5;
+    if (score >= nextLifeScore && lives < maxLives){
+        lives++;                // give 1 life
+        nextLifeScore += 1000;  // set the next threshold
+    } else if (maxLives==lives){
+        nextLifeScore=score+1000;
+    }
 }
 
 void Program::Draw() {
@@ -88,14 +98,18 @@ void Program::Draw() {
     if (startup) DrawStartup();
     if (paused) DrawPauseScreen();
     if (gameOver) DrawGameOver();
+    if (scoreboard) DrawScore();
 }
 
 void Program::ManageEnemyRespawns() {
     delay = std::max(delay - 1, 0);
 
+    int dynamicCooldown = baseCooldown - (score / 1000) * 20; 
+    if (dynamicCooldown < minCooldown) dynamicCooldown = minCooldown;
+
     respawnCooldown -= 1;
     if (respawnCooldown <= 0) {
-        respawnCooldown = 1080;
+        respawnCooldown = dynamicCooldown;
         for (std::pair<std::pair<float, float>, Enemy*>& p : Enemy::enemies) {
             if (!p.second && p.first.second != 150) {
                 int eType = GetRandomValue(1, 3);
@@ -139,6 +153,11 @@ void Program::DrawStartup() {
     DrawText("Press Enter", (GetScreenWidth() / 2) - 75, GetScreenHeight() / 2, 24, GRAY);
 }
 
+void Program::DrawScore() {
+    std::string scoreText = "SCORE: " + std::to_string(this->score);
+    DrawText(scoreText.c_str(), (GetScreenWidth() / 2) - 500, GetScreenHeight() / 2 - 500, 24, WHITE);
+}
+
 void Program::DrawPauseScreen() {
     DrawRectangle(0, 0, (float)GetScreenWidth(), (float)GetScreenHeight(), Color{0, 0, 0, 125});
     DrawText("Paused", (GetScreenWidth() / 2) - 85, GetScreenHeight() / 2 - 60, 48, WHITE);
@@ -156,6 +175,10 @@ void Program::KeyInputs() {
     if (!paused && !startup && IsKeyPressed('O')) gameOver = !gameOver;
     if (!gameOver && !paused && IsKeyPressed('I')) startup = !startup;
     if (IsKeyPressed('H')) HitBox::drawHitbox = !HitBox::drawHitbox;
+    if (!gameOver && !paused && !startup && IsKeyPressed('K')) {
+        score += 500;
+        scoreboard=true;
+    }
     
     if (gameOver && IsKeyPressed(KEY_ENTER)) {
         gameOver = false;
@@ -164,6 +187,7 @@ void Program::KeyInputs() {
 
     if (startup && IsKeyPressed(KEY_ENTER)) {
         startup = false;
+
     }
 
     if (!startup && !paused && !gameOver && pauseFrames <= 0) player->keyInputs();
@@ -191,6 +215,7 @@ void Program::Reset() {
     count = 0;
     delay = 0;
     lives = 3;
+    score = 0;
 
     Enemy::enemies.push_back({{350, 150}, new SpEnemy(350, 150)});
     Enemy::enemies.push_back({{600, 150}, new SpEnemy(600, 150)});

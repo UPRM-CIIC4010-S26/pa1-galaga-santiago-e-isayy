@@ -14,15 +14,20 @@ class Program {
         Background background = Background();
         Player* player = new Player((GetScreenWidth() / 2) - 15, GetScreenHeight() * 0.75f);
         int respawnCooldown = 1080;
+        int baseCooldown=1000;
+        int minCooldown=300;
         int respawns = 0;
         int count = 0;
         int delay = 0;
         int lives = 3;
         int pauseFrames = 0;
+        int score = 0;
+        int nextLifeScore=1000;
 
         bool startup = true;
         bool paused = false;
         bool gameOver = false;
+        bool scoreboard = false;
 
     public:
         Program();
@@ -33,6 +38,7 @@ class Program {
         void DrawStartup();
         void DrawPauseScreen();
         void DrawGameOver();
+        void DrawScore();
         void KeyInputs();
         void PlayerReset();
         void Reset();
