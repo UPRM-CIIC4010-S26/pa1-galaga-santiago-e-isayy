@@ -66,10 +66,10 @@ void Program::Update() {
             }
 
         }
-
         if (lives <= 0 && pauseFrames <= 0) gameOver = true;
         Projectile::CleanProjectiles();
         Projectile::ProjectileCollision();
+
     }
     int maxLives=5;
     if (score >= nextLifeScore && lives < maxLives){
@@ -78,6 +78,7 @@ void Program::Update() {
     } else if (maxLives==lives){
         nextLifeScore=score+1000;
     }
+    score = Enemy::Score;
 }
 
 void Program::Draw() {
@@ -182,11 +183,13 @@ void Program::KeyInputs() {
     
     if (gameOver && IsKeyPressed(KEY_ENTER)) {
         gameOver = false;
+        scoreboard=true;
         Reset();
     }
 
     if (startup && IsKeyPressed(KEY_ENTER)) {
         startup = false;
+        scoreboard=true;
 
     }
 
